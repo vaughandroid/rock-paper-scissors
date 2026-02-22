@@ -1,16 +1,17 @@
 import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
-import type { Move } from './types.ts'
+import type { Move, Choice } from './types.ts'
 import { determineOutcome, randomMove } from './game.ts'
 
 const VALID_MOVES: Move[] = ['rock', 'paper', 'scissors']
+const VALID_CHOICES: Choice[] = [...VALID_MOVES, 'quit']
 
 const rl = createInterface({ input, output })
 
-async function getPlayerMove(): Promise<Move> {
+async function getPlayerChoice(): Promise<Choice> {
   while (true) {
-    const answer = (await rl.question('Your move (rock/paper/scissors): ')).trim().toLowerCase()
-    if (VALID_MOVES.includes(answer as Move)) return answer as Move
+    const answer = (await rl.question('Your move (rock/paper/scissors) or quit: ')).trim().toLowerCase()
+    if (VALID_CHOICES.includes(answer as Choice)) return answer as Choice
     console.log('Invalid move. Please enter rock, paper, or scissors.')
   }
 }
@@ -19,16 +20,14 @@ async function main() {
   console.log('Rock, Paper, Scissors!\n')
 
   while (true) {
-    const player = await getPlayerMove()
+    const choice = await getPlayerChoice()
+    if (choice === 'quit') break
+
     const cpu = randomMove()
-    const outcome = determineOutcome(player, cpu)
+    const outcome = determineOutcome(choice, cpu)
 
     console.log(`CPU chose: ${cpu}`)
     console.log(outcome === 'win' ? 'You win!' : outcome === 'lose' ? 'You lose!' : "It's a draw!")
-    console.log()
-
-    const again = (await rl.question('Play again? (y/n): ')).trim().toLowerCase()
-    if (again !== 'y') break
     console.log()
   }
 
