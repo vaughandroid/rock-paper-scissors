@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { determineOutcome } from './game.ts'
+import { determineOutcome } from '../src/game.ts'
 
 describe('determineOutcome', () => {
   it.each([
