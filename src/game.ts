@@ -28,14 +28,14 @@ export async function getPlayerChoice(ui: UserInterface): Promise<Choice> {
   }
 }
 
-export async function playGame(ui: UserInterface) {
+export async function playGame(ui: UserInterface, getMove: () => Move = randomMove) {
   ui.print('Rock, Paper, Scissors!\n')
 
   while (true) {
     const choice = await getPlayerChoice(ui)
     if (choice === 'quit') break
 
-    const cpu = randomMove()
+    const cpu = getMove()
     const outcome = determineOutcome(choice, cpu)
 
     ui.print(`CPU chose: ${cpu}`)
