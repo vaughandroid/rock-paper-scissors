@@ -1,20 +1,20 @@
 import { describe, it, expect } from 'vitest'
 import type { UserInterface } from '../src/ui.ts'
-import { determineOutcome, randomMove, getPlayerChoice, playGame } from '../src/game.ts'
+import { determineOutcome, randomMove, parseChoice, getPlayerChoice, playGame } from '../src/game.ts'
 
 function createMockUI(responses: string[]) {
-  const queue = [...responses]
+  const responsesQueue = [...responses]
   const events: string[] = []
   const ui: UserInterface = {
     print(message: string) { events.push(message) },
     async ask(_prompt: string) {
-      const response = queue.shift()
+      const response = responsesQueue.shift()
       if (response === undefined) throw new Error('Unexpected ask — no more queued responses')
       return response
     },
     close() { events.push('[closed]') },
   }
-  return { ui, events }
+  return { ui, events: events }
 }
 
 describe('randomMove', () => {
@@ -28,6 +28,24 @@ describe('randomMove', () => {
       expect(count).toBeGreaterThan(expected - tolerance)
       expect(count).toBeLessThan(expected + tolerance)
     }
+  })
+})
+
+describe('parseChoice', () => {
+  it.each(['rock', 'paper', 'scissors', 'quit'] as const)('returns %s for valid input', (input) => {
+    expect(parseChoice(input)).toBe(input)
+  })
+
+  it('normalises uppercase', () => {
+    expect(parseChoice('ROCK')).toBe('rock')
+  })
+
+  it('trims whitespace', () => {
+    expect(parseChoice('  scissors  ')).toBe('scissors')
+  })
+
+  it.each(['banana', ''])('returns null for invalid input %j', (input) => {
+    expect(parseChoice(input)).toBeNull()
   })
 })
 
@@ -62,11 +80,6 @@ describe('getPlayerChoice', () => {
     const { ui, events } = createMockUI(['banana', 'scissors'])
     expect(await getPlayerChoice(ui)).toBe('scissors')
     expect(events).toContain('Invalid move. Please enter rock, paper, or scissors.')
-  })
-
-  it('normalises uppercase and whitespace', async () => {
-    const { ui } = createMockUI(['  ROCK  '])
-    expect(await getPlayerChoice(ui)).toBe('rock')
   })
 })
 

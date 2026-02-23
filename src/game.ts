@@ -12,18 +12,22 @@ export function determineOutcome(player: Move, cpu: Move): Outcome {
   return beats[player] === cpu ? 'win' : 'lose'
 }
 
-export function randomMove(): Move {
-  const moves: Move[] = ['rock', 'paper', 'scissors']
-  return moves[Math.floor(Math.random() * moves.length)]
-}
-
 const VALID_MOVES: Move[] = ['rock', 'paper', 'scissors']
 const VALID_CHOICES: Choice[] = [...VALID_MOVES, 'quit']
 
+export function randomMove(): Move {
+  return VALID_MOVES[Math.floor(Math.random() * VALID_MOVES.length)]
+}
+
+export function parseChoice(raw: string): Choice | null {
+  const normalized = raw.trim().toLowerCase()
+  return (VALID_CHOICES as string[]).includes(normalized) ? normalized as Choice : null
+}
+
 export async function getPlayerChoice(ui: UserInterface): Promise<Choice> {
   while (true) {
-    const answer = (await ui.ask('Your move (rock/paper/scissors) or quit: ')).trim().toLowerCase()
-    if (VALID_CHOICES.includes(answer as Choice)) return answer as Choice
+    const choice = parseChoice(await ui.ask('Your move (rock/paper/scissors) or quit: '))
+    if (choice !== null) return choice
     ui.print('Invalid move. Please enter rock, paper, or scissors.')
   }
 }
